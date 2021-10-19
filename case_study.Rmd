@@ -7,6 +7,7 @@ The thing we start all files with:
 
 ```{r setup, include = FALSE}
 library(tidyverse)
+library(p8105.datasets)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -24,3 +25,104 @@ options(
 sclae_colour_discrete = scale_color_viridis_d()
 scale_fill_discrete = scale_fill_viridis_d
 ```
+
+
+## Load a dataset
+
+```{r}
+data("nyc_airbnb")
+
+#View data
+str(nyc_airbnb)
+
+nyc_airbnb %>%
+  count(room_type)
+
+nyc_airbnb %>%
+  count(neighbourhood_group)
+```
+
+* How many rentals are there? what type? Where?
+* Is price correlated with review score?
+* Which neighborhood is most popular? Most expensive?
+* Which neighborhood has highest reviews?
+* Is availability related to price?
+* Is room type related to neighborhood?
+* Is length of stay related to neighborhood group (borough)?
+
+```{r}
+nyc_airbnb = 
+  nyc_airbnb %>% 
+  mutate(stars = review_scores_location/2) %>% 
+  rename (borough = neighbourhood_group)
+```
+
+Let's count things:
+
+```{r}
+nyc_airbnb %>% 
+  janitor::tabyl(borough, room_type)
+  
+```
+
+We get the same table and it may be easier to get other info if we do it this way:
+
+```{r, eval=FALSE}
+nyc_airbnb %>% 
+  count(borough, room_type) %>% 
+  pivot_wider(
+    names_from = room_type,
+    values_from = n
+  )
+```
+
+
+Let's look at price and room type ...
+
+```{r}
+nyc_airbnb %>% 
+  ggplot(aes(x = stars, y = price)) +
+  geom_point() +
+  facet_grid(. ~ room_type)
+```
+
+Price and neighbourhood
+
+```{r}
+nyc_airbnb %>% 
+  filter(borough == "Manhattan") %>% 
+  group_by(neighbourhood) %>% 
+  summarize(mean_price = mean(price, na.rm = TRUE)) %>% 
+
+arrange(mean_price)
+
+nyc_airbnb %>% 
+  filter(borough == "Manhattan", price <= 1000) %>% 
+  mutate(neighbourhood = 
+           fct_reorder(neighbourhood, price)) %>% 
+  ggplot(aes(x = neighbourhood, y = price)) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_grid(. ~ room_type)
+```
+
+Look at that coord flip!
+
+
+Price vs location
+
+_using `sample_n` because it's a huge dataset_
+
+```{r}
+nyc_airbnb %>% 
+  filter(price < 500) %>% 
+  sample_n(5000) %>% 
+  ggplot(aes(x = lat, y = long, color = price)) +
+  geom_point(alpha = 0.5)
+```
+
+
+
+
+
+
