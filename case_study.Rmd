@@ -1,6 +1,6 @@
 ---
 title: "case study"
-output: github_document
+output: html_document
 ---
 
 The thing we start all files with:
@@ -121,7 +121,44 @@ nyc_airbnb %>%
   geom_point(alpha = 0.5)
 ```
 
+## retry leaflet
 
+We want to make a map because to use the previous one, you have to know what NYC looks like.
+Leaflet is a handy tool with a dataframe for maps.
+
+
+```{r}
+library(leaflet)
+
+nyc_airbnb %>% 
+  filter(price < 500) %>% 
+  sample_n(1000) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(~lat, ~long)
+```
+
+Woah!
+
+`sp package` and `maps package` have some interesting stuff.
+
+If you want spatial squares:
+
+```{r}
+pal = colorNumeric("viridis", NULL)
+nyc_airbnb %>% 
+  filter(price < 500) %>% 
+  sample_n(1000) %>% 
+  mutate(
+    label = str_c("<b>Stars: ", stars, "</b><br>Price: ", price, sep = "")
+  ) %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(~lat, ~long, radius = 1, popup = ~ label, color = ~pal(price))
+```
+
+
+Can't knit to a github doc when you have an interactive map like this, has to be html.
 
 
 

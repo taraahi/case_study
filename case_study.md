@@ -165,3 +165,17 @@ nyc_airbnb %>%
 ```
 
 <img src="case_study_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
+
+## retry leaflet
+
+We want to make a map because to use the previous one, you have to know
+what NYC looks like. Leaflet is a handy tool with a dataframe for maps.
+
+``` r
+library(leaflet)
+
+nyc_airbnb %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addMarkers(~lng, ~long)
+```
